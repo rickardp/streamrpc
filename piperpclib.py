@@ -35,7 +35,7 @@ Example (server):
     rpc.register_function(my_method)
     rpc.serve_forever()
 """
-from __future__ import print_function
+#from __future__ import print_function
 import sys, os
 import traceback
 import xmlrpclib, SimpleXMLRPCServer
@@ -155,7 +155,7 @@ class Server(SimpleXMLRPCDispatcher):
     handler = None
     dispatchers = None
     def __init__(self, input=sys.stdin, output=sys.stdout, dispatchers=None):
-        SimpleXMLRPCDispatcher.__init__(self, allow_none=True)
+        SimpleXMLRPCDispatcher.__init__(self, allow_none=True, encoding=None)
         if not dispatchers:
             dispatchers = {
                 '/RPC2' : self
@@ -192,7 +192,10 @@ class Server(SimpleXMLRPCDispatcher):
             dispatcher = self.dispatchers.get(path)
             if not dispatcher:
                 raise xmlrpclib.ResponseError("No dispatcher for path '%s'" % path)
-            response = dispatcher._marshaled_dispatch(data, None, path)
+            kw = dict()
+            if path and path != "/RPC2":
+                kw["path"] = path
+            response = dispatcher._marshaled_dispatch(data, **kw)
         except:
             # report low level exception back to server
             # (each dispatcher should have handled their own

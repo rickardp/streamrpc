@@ -1,4 +1,4 @@
-from __future__ import print_function
+#from __future__ import print_function
 import unittest
 import sys, os
 import subprocess
@@ -86,7 +86,7 @@ class BasicTests(unittest.TestCase):
             assert f.faultString == "A Fault"
 
 def _server(path="/RPC2"):
-    proc = subprocess.Popen(["python", __file__, "serve"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["python","-mtests.piperpclib_test", "serve"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     rpc = piperpclib.ServerProxy(process=proc, path=path)
     return rpc
 

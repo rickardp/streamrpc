@@ -19,5 +19,5 @@ setup(
     py_modules=['piperpclib'],
     install_requires=requirements + test_requirements,
     zip_safe=True,
-    test_suite='tests.test'
+    test_suite='tests'
 )
