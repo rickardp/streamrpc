@@ -28,7 +28,8 @@ class BasicTests(unittest.TestCase):
         rpc = _server()
         try:
             rpc.unsupported_method()
-        except piperpclib.Fault, f:
+        except piperpclib.Fault:
+            f = sys.exc_info()[1]
             assert "is not supported" in f.faultString
 
     def test_parameterless(self):
@@ -73,7 +74,8 @@ class BasicTests(unittest.TestCase):
         rpc = _server()
         try:
             value = rpc.test_exception()
-        except piperpclib.Fault, f:
+        except piperpclib.Fault:
+            f = sys.exc_info()[1]
             assert f.faultCode == 1
             assert f.faultString == "<type 'exceptions.Exception'>:A regular Python exception"
 
@@ -81,7 +83,8 @@ class BasicTests(unittest.TestCase):
         rpc = _server()
         try:
             value = rpc.test_fault()
-        except piperpclib.Fault, f:
+        except piperpclib.Fault:
+            f = sys.exc_info()[1]
             assert f.faultCode == 42
             assert f.faultString == "A Fault"
 

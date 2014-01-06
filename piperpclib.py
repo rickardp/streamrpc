@@ -38,12 +38,23 @@ Example (server):
 #from __future__ import print_function
 import sys, os
 import traceback
-import xmlrpclib, SimpleXMLRPCServer
+try:
+    import xmlrpclib
+    __OLDSTYLE_XMLRPC_PACKAGES = True
+except ImportError:
+    __OLDSTYLE_XMLRPC_PACKAGES = False
+    
+if __OLDSTYLE_XMLRPC_PACKAGES:
+    from xmlrpclib import Fault
+    from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCDispatcher
+    BUF = lambda _:_
+else:
+    from xmlrpc.client import Fault
+    import xmlrpc.client as xmlrpclib
+    from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCDispatcher
+    BUF = lambda s:bytes(s,'UTF-8')
 
 __ALL__ = ["Server", "ServerProxy", "PipeTransport", "Fault", "SimpleXMLRPCDispatcher"]
-
-Fault = xmlrpclib.Fault
-SimpleXMLRPCDispatcher = SimpleXMLRPCServer.SimpleXMLRPCDispatcher
 
 
 class PipeTransport:
@@ -106,7 +117,7 @@ class PipeTransport:
         return h, data
         
     def write_item(self, handler, request_body):
-        self.output.write("RPC 1 %s %d\n" % (handler, len(request_body)))
+        self.output.write(BUF("RPC 1 %s %d\n" % (handler, len(request_body))))
         self.output.write(request_body)
         self.output.flush()
         
@@ -170,8 +181,8 @@ class Server(SimpleXMLRPCDispatcher):
             while True:
                 try:
                     self.process_one()
-                except IOError, e:
-                    if e.errno == 32: # Broken pipe
+                except IOError:
+                    if sys.exc_info()[1].errno == 32: # Broken pipe
                         break
                     else:
                         raise
@@ -183,7 +194,7 @@ class Server(SimpleXMLRPCDispatcher):
             path, data = self.transport.read_item()
             response = self.do_dispatch(data, path)
             self.transport.write_item(path, response)
-        except Exception, e: # Internal error
+        except Exception: # Internal error
             self.transport.close()
             raise
     
