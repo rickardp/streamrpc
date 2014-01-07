@@ -54,7 +54,10 @@ else:
     from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCDispatcher
     BUF = lambda s:bytes(s,'UTF-8')
 
-__ALL__ = ["Server", "ServerProxy", "PipeTransport", "Fault", "SimpleXMLRPCDispatcher"]
+__ALL__ = ["Client", "Server", "ServerProxy", "PipeTransport", "Fault", "SimpleXMLRPCDispatcher", "Dispatcher"]
+
+# Alias for convenience
+Dispatcher = SimpleXMLRPCDispatcher
 
 
 class PipeTransport:
@@ -145,7 +148,7 @@ class PipeTransport:
     def __del__(self):
         self.close()
     
-class ServerProxy(xmlrpclib.ServerProxy):    
+class Client(xmlrpclib.ServerProxy):    
     def __init__(self, input=None, output=None, process=None, path="/RPC2"):
         if process:
             if input or output:
@@ -160,6 +163,8 @@ class ServerProxy(xmlrpclib.ServerProxy):
             raise ValueError("Output was not set")
         if path[0] != "/": path = "/%s" % path
         xmlrpclib.ServerProxy.__init__(self, "http://localhost%s" % path, transport=PipeTransport(input, output), allow_none=True)
+
+ServerProxy = Client
 
 class Server(SimpleXMLRPCDispatcher):
     transport = None
