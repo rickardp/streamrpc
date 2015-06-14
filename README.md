@@ -1,4 +1,4 @@
-![Travis CI status](https://travis-ci.org/evolvIQ/python-pipe-rpc.svg?branch=master)
+[![Travis CI status](https://travis-ci.org/evolvIQ/python-pipe-rpc.svg?branch=master)](https://travis-ci.org/evolvIQ/python-pipe-rpc)
 
 pipe-rpc
 ==========
