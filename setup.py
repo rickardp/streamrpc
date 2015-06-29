@@ -7,17 +7,18 @@ ROOT_DIR = os.path.dirname(__file__)
 SOURCE_DIR = os.path.join(ROOT_DIR)
 
 test_requirements = []
-requirements = []
+requirements = ['splitstream>=1.2.0','json-rpc>=1.9.2']
 
 setup(
-    name="pipe-rpc",
-    url="https://github.com/evolvIQ/python-pipe-rpc",
-    author="Rickard Petzäll",
-    author_email="rickard@petzall.com",
-    version='0.0.1',
-    description="XML-RPC over pipe pair.",
-    py_modules=['piperpc'],
+    name="streamrpc",
+    url="https://github.com/evolvIQ/streamrpc",
+    author="Rickard Lyrenius",
+    author_email="rickard@evolviq.com",
+    version='1.0.0',
+    description="XML-RPC / JSON-RPC over pipe pair.",
+    py_modules=['streamrpc'],
     install_requires=requirements + test_requirements,
     zip_safe=True,
+    classifiers=["License :: OSI Approved :: Apache Software License", "Topic :: Software Development :: Libraries :: Python Modules"],
     test_suite='tests'
 )

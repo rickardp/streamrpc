@@ -1,8 +1,9 @@
-#from __future__ import print_function
 import unittest
-import sys, os
+import sys, os, json
+if len(sys.argv) > 2 and sys.argv[1] == "serve":
+    sys.path += json.loads(sys.argv[2])
 import subprocess
-import piperpc
+import streamrpc
 
 def test_parameterless():
     return "Value"
@@ -20,97 +21,97 @@ def test_exception():
     raise Exception("A regular Python exception")
     
 def test_fault():
-    raise piperpc.Fault(42, "A Fault")
+    raise streamrpc.Fault(42, "A Fault")
 
-class BasicTests(unittest.TestCase):
-
+class XmlTests(unittest.TestCase):
+    def _servertype(self):
+        return "streamrpc.XmlServer"
+        
+    def _clienttype(self, process):
+        return streamrpc.XmlClient(process=process)
+        
+    def _testmodule(self):
+        return "xmlrpc_test"
+    
+    def _server(self):
+        proc = subprocess.Popen(["/usr/bin/python","-mtests." + self._testmodule(), "serve",json.dumps(sys.path),self._servertype()], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        rpc = self._clienttype(proc)
+        return rpc
+        
     def test_unsupported_method(self):
-        rpc = _server()
+        rpc = self._server()
         try:
             rpc.unsupported_method()
-        except piperpc.Fault:
+        except streamrpc.Fault:
             f = sys.exc_info()[1]
             assert "is not supported" in f.faultString
 
     def test_parameterless(self):
-        rpc = _server()
+        rpc = self._server()
         value = rpc.test_parameterless()
         assert value == "Value"
 
     def test_parameters(self):
-        rpc = _server()
+        rpc = self._server()
         value = rpc.test_parameters("Hello", True)
         assert value == "Value: Hello, True"
 
     def test_None(self):
-        rpc = _server()
+        rpc = self._server()
         value = rpc.test_passthrough(None)
         assert value is None
 
     def test_list(self):
-        rpc = _server()
+        rpc = self._server()
         input = [1,2,3,4,5]
         value = rpc.test_passthrough(input)
         assert value == input
 
     def test_tuple(self):
-        rpc = _server()
+        rpc = self._server()
         input = (1,2,3,4,5)
         value = rpc.test_passthrough(input)
         assert value == list(input)
 
     def test_boolean(self):
-        rpc = _server()
+        rpc = self._server()
         value = rpc.test_passthrough(False)
         assert value == False
 
     def test_large_structure(self):
-        rpc = _server()
+        rpc = self._server()
         input = list(range(100000))
         value = rpc.test_passthrough(input)
         assert value == input
 
     def test_exception(self):
-        rpc = _server()
+        rpc = self._server()
         try:
             value = rpc.test_exception()
-        except piperpc.Fault:
+        except streamrpc.Fault:
             f = sys.exc_info()[1]
             assert f.faultCode == 1
             assert f.faultString == "<type 'exceptions.Exception'>:A regular Python exception"
 
     def test_fault(self):
-        rpc = _server()
+        rpc = self._server()
         try:
             value = rpc.test_fault()
-        except piperpc.Fault:
+        except streamrpc.Fault:
             f = sys.exc_info()[1]
             assert f.faultCode == 42
             assert f.faultString == "A Fault"
 
-def _server(path="/RPC2"):
-    proc = subprocess.Popen(["python","-mtests.piperpc_test", "serve"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    rpc = piperpc.ServerProxy(process=proc, path=path)
-    return rpc
-
-if __name__ == '__main__':    
-    # simple self test
-    if len(sys.argv) > 1 and sys.argv[1] == "serve":
-        #print("Server is %d" % os.getpid(), file=sys.stderr)
-        rpc = piperpc.Server()
+if __name__ == '__main__':
+    if len(sys.argv) > 3 and sys.argv[1] == "serve":
+        import time,os
+        
+        rpc = eval(sys.argv[3])()
         rpc.register_function(test_parameterless)
         rpc.register_function(test_parameters)
         rpc.register_function(test_passthrough)
         rpc.register_function(test_exception)
         rpc.register_function(test_fault)
-        rpc.serve_forever()
-    elif len(sys.argv) > 1 and sys.argv[1] == "multiserve":
-        #print("Server is %d" % os.getpid(), file=sys.stderr)
-        d1 = piperpc.SimpleXMLRPCDispatcher(allow_none=True)
-        d1.register_function(test_parameterless)
-        d2 = piperpc.SimpleXMLRPCDispatcher(allow_none=True)
-        d2.register_function(test_parameterless_alt, "test_parameterless")
-        rpc = piperpc.Server(dispatchers={"/A" : d1, "/B" : d2})
         rpc.serve_forever()
     else:
         unittest.main(verbosity=2)
