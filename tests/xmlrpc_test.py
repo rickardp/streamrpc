@@ -34,7 +34,7 @@ class XmlTests(unittest.TestCase):
         return "xmlrpc_test"
     
     def _server(self):
-        proc = subprocess.Popen(["/usr/bin/python","-mtests." + self._testmodule(), "serve",json.dumps(sys.path),self._servertype()], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        proc = subprocess.Popen([sys.executable, "-mtests." + self._testmodule(), "serve",json.dumps(sys.path),self._servertype()], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         rpc = self._clienttype(proc)
         return rpc
         
@@ -91,7 +91,7 @@ class XmlTests(unittest.TestCase):
         except streamrpc.Fault:
             f = sys.exc_info()[1]
             assert f.faultCode == 1
-            assert f.faultString == "<type 'exceptions.Exception'>:A regular Python exception"
+            assert "A regular Python exception" in f.faultString
 
     def test_fault(self):
         rpc = self._server()
