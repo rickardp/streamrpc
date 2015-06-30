@@ -14,9 +14,9 @@ setup(
     url="https://github.com/evolvIQ/streamrpc",
     author="Rickard Lyrenius",
     author_email="rickard@evolviq.com",
-    version='1.0.1',
+    version='1.0.2',
     description="XML-RPC / JSON-RPC over pipe pair.",
-    py_modules=['streamrpc'],
+    packages=['streamrpc'],
     install_requires=requirements + test_requirements,
     zip_safe=True,
     classifiers=[

@@ -1,6 +1,5 @@
-import jsonrpc_test
-import streamrpc
+from . import xmlrpc_test
 
-class JsonAutoDetectTests(jsonrpc_test.JsonTests):
+class XmlAutoDetectTests(xmlrpc_test.XmlTests):
     def _servertype(self):
         return "streamrpc.Server"

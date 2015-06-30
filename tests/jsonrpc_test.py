@@ -1,5 +1,5 @@
 import sys
-import xmlrpc_test
+from . import xmlrpc_test
 import streamrpc
 
 class JsonTests(xmlrpc_test.XmlTests):
