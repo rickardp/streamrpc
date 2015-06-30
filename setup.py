@@ -7,7 +7,7 @@ ROOT_DIR = os.path.dirname(__file__)
 SOURCE_DIR = os.path.join(ROOT_DIR)
 
 test_requirements = []
-requirements = ['splitstream>=1.2.0','json-rpc>=1.9.2']
+requirements = ['splitstream>=1.2.0']
 
 setup(
     name="streamrpc",

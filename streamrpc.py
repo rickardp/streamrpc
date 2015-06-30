@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*
 #
-#   piperpc.py
-#   piperpc - XML-RPC/JSON-RPC over raw streams (pipes, SSH tunnels, 
-#             raw TCP sockets, etc)
+#   streamrpc.py
+#   streamrpc - XML-RPC/JSON-RPC over raw streams (pipes, SSH tunnels, 
+#               raw TCP sockets, etc)
 #
 #   Copyright © 2015 Rickard Lyrenius
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +23,10 @@
 Example (client):
 -----------------
 
-    proc = subprocess.Popen(["ssh","myserver","python", "server.py"], 
+    proc = streamrpc.Popen(["ssh","myserver","python", "server.py"], 
        stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     
-    rpc = piperpclib.XmlClient(process=proc, path=path)
+    rpc = streamrpc.XmlClient(process=proc, path=path)
     rpc.my_method("Some","Args")
 
 Example (server):
@@ -35,7 +35,7 @@ Example (server):
     def my_method(arg1, arg2):
        ...
     
-    rpc = piperpclib.Server()
+    rpc = streamrpc.Server()
     rpc.register_function(my_method)
     rpc.serve_forever()
 """
@@ -90,7 +90,7 @@ def _wrapinput(f):
     
     try:
         # Set file descriptor to nonblocking. Does not work on Windows
-        import fcntl, select, stat
+        import fcntl, select, stat, errno
         fmode = os.fstat(fd).st_mode
         if stat.S_ISFIFO(fmode) or stat.S_ISCHR(fmode) or stat.S_ISSOCK(fmode):
             fl = fcntl.fcntl(fd, fcntl.F_GETFL)
@@ -101,7 +101,7 @@ def _wrapinput(f):
                     try:
                         d = rd(n)
                     except IOError,e:
-                        if e.errno == 35:
+                        if e.errno == errno.EAGAIN:
                             select.select([fd], [], [], 1)
                             continue
                         raise
